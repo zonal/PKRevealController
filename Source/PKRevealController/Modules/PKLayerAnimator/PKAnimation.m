@@ -56,9 +56,8 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    PKAnimation *newAnimation = [super copyWithZone:zone];
+    PKAnimation *newAnimation = (PKAnimation *) [super copyWithZone:zone];
     newAnimation->_identifier = self.identifier;
-    
     return newAnimation;
 }
 
@@ -85,12 +84,9 @@
 
 - (void)setLayer:(CALayer *)layer
 {
-    if (self.isAnimating)
-    {
+    if (self.isAnimating) {
         PKLog(@"ERROR: Cannot mutate animation properties while animation is in progress.");
-    }
-    else
-    {
+    } else {
         if (layer != _layer)
         {
             _layer = layer;
@@ -100,32 +96,27 @@
 
 #pragma mark - CAAnimationDelegate
 
-- (void)animationDidStart:(CABasicAnimation *)animation
+- (void)animationDidStart:(CAAnimation *)animation
 {
     self.animating = YES;
     
-    [self pk_performBlock:^
-    {
+    [self pk_performBlock:^ {
         if (self.startHandler)
         {
             self.startHandler();
         }
-    }
-    onMainThread:YES];
+    } onMainThread:YES];
 }
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag
 {
     self.animating = NO;
-    
-    [self pk_performBlock:^
-    {
+    [self pk_performBlock:^ {
         if (self.completionHandler)
         {
             self.completionHandler(flag);
         }
-    }
-    onMainThread:YES];
+    } onMainThread:YES];
 }
 
 @end

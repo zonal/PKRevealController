@@ -72,11 +72,16 @@ static NSString *kShadowTransitionAnimationKey = @"shadowTransitionAnimation";
 
 - (void)updateShadowWithAnimationDuration:(NSTimeInterval)duration
 {
+    if(CGPathIsEmpty(self.layer.shadowPath))
+    {
+        return;
+    }
+
     UIBezierPath *existingShadowPath = [UIBezierPath bezierPathWithCGPath:self.layer.shadowPath];
-    
+
     self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
-    
-    if (existingShadowPath != nil)
+
+    if (existingShadowPath)
     {
         PKAnimation *transition = [PKAnimation animationWithKeyPath:@"shadowPath"];
         transition.fromValue = (__bridge id)(existingShadowPath.CGPath);
@@ -85,7 +90,7 @@ static NSString *kShadowTransitionAnimationKey = @"shadowTransitionAnimation";
         transition.removedOnCompletion = NO;
         transition.delegate = self;
         transition.identifier = SHADOW_TRANSITION_ANIMATION_IDENTIFIER;
-        
+
         [self.layer addAnimation:transition forKey:kShadowTransitionAnimationKey];
     }
 }

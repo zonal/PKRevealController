@@ -62,23 +62,23 @@
 
 - (void)addAnimation:(PKAnimation *)animation forKey:(NSString *)key
 {
-    [self.animations setObject:animation forKey:key];
+    self.animations[key] = animation;
 }
 
 - (void)addSequentialAnimation:(PKSequentialAnimation *)animation forKey:(NSString *)key
 {
-    [self.animations setObject:animation forKey:key];
+    self.animations[key] = animation;
 }
 
 - (void)startAnimationForKey:(NSString *)key
 {
-    id<PKAnimating> animation = [self.animations objectForKey:key];
+    id<PKAnimating> animation = self.animations[key];
     [animation startAnimationOnLayer:self.layer];
 }
 
 - (void)stopAnimationForKey:(NSString *)key
 {
-    id<PKAnimating> animation = [self.animations objectForKey:key];
+    id<PKAnimating> animation = self.animations[key];
     [animation stopAnimation];
 }
 

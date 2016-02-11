@@ -73,6 +73,13 @@ typedef struct
     PKRevealControllerFrontViewInteractionFlags _frontViewInteraction;
 }
 
+typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
+{
+    kZNLPKRevealControllerViewTypeLeft,
+    kZNLPKRevealControllerViewTypeRight,
+    kZNLPKRevealControllerViewTypeCentre
+};
+
 #pragma mark - Properties
 @property (nonatomic, strong, readwrite) PKRevealControllerView *frontView;
 @property (nonatomic, strong, readwrite) PKRevealControllerView *leftView;
@@ -112,7 +119,7 @@ typedef struct
                                      leftViewController:(UIViewController *)leftViewController
                                     rightViewController:(UIViewController *)rightViewController
 {
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
+    return [[self alloc] initWithFrontViewController:frontViewController
                                           leftViewController:leftViewController
                                          rightViewController:rightViewController
                                                      options:nil];
@@ -121,7 +128,7 @@ typedef struct
 + (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
                                      leftViewController:(UIViewController *)leftViewController
 {
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
+    return [[self alloc] initWithFrontViewController:frontViewController
                                           leftViewController:leftViewController
                                                      options:nil];
 }
@@ -129,7 +136,7 @@ typedef struct
 + (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
                                     rightViewController:(UIViewController *)rightViewController
 {
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
+    return [[self alloc] initWithFrontViewController:frontViewController
                                          rightViewController:rightViewController
                                                      options:nil];
 }
@@ -201,11 +208,9 @@ typedef struct
     return self;
 }
 
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil
-                         bundle:(NSBundle *)nibBundleOrNil
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:nibNameOrNil
-                           bundle:nibBundleOrNil];
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     
     if (self)
     {
@@ -213,36 +218,6 @@ typedef struct
     }
     
     return self;
-}
-#pragma mark - Deprecated Initialization
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                     leftViewController:(UIViewController *)leftViewController
-                                                options:(NSDictionary *)options
-{
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
-                                          leftViewController:leftViewController
-                                                     options:options];
-}
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                    rightViewController:(UIViewController *)rightViewController
-                                                options:(NSDictionary *)options
-{
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
-                                         rightViewController:rightViewController
-                                                     options:options];
-}
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                     leftViewController:(UIViewController *)leftViewController
-                                    rightViewController:(UIViewController *)rightViewController
-                                                options:(NSDictionary *)options
-{
-    return [[[self class] alloc] initWithFrontViewController:frontViewController
-                                          leftViewController:leftViewController
-                                         rightViewController:rightViewController
-                                                     options:options];
 }
 
 #pragma mark - Actions
@@ -267,40 +242,29 @@ typedef struct
     [self showViewController:controller animated:YES completion:nil];
 }
 
-- (void)showViewController:(UIViewController *)controller
-                  animated:(BOOL)animated
-                completion:(PKDefaultCompletionHandler)completion
+- (void)showViewController:(UIViewController *)controller animated:(BOOL)animated completion:(PKDefaultCompletionHandler)completion
 {
     PKRevealControllerState toState = PKRevealControllerShowsFrontViewController;
     CGPoint toPoint = [self centerPointForState:toState];
     
-    if ([controller isEqual:self.leftViewController])
-    {
+    if ([controller isEqual:self.leftViewController]) {
         toState = PKRevealControllerShowsLeftViewController;
         toPoint = [self centerPointForState:toState];
-    }
-    else if ([controller isEqual:self.rightViewController])
-    {
+    } else if ([controller isEqual:self.rightViewController]) {
         toState = PKRevealControllerShowsRightViewController;
         toPoint = [self centerPointForState:toState];
     }
     
-    if (animated)
-    {
+    if (animated) {
         [self animateToState:toState completion:completion];
-    }
-    else
-    {
+    } else {
         self.frontView.layer.position = toPoint;
     }
 }
 
-- (void)enterPresentationModeForViewController:(UIViewController *)controller
-                                      animated:(BOOL)animated
-                                    completion:(PKDefaultCompletionHandler)completion
+- (void)enterPresentationModeForViewController:(UIViewController *)controller animated:(BOOL)animated completion:(PKDefaultCompletionHandler)completion
 {
-    if (![controller isEqual:self.rightViewController]  ||
-        ![controller isEqual:self.leftViewController])
+    if (![controller isEqual:self.rightViewController]  || ![controller isEqual:self.leftViewController])
     {
         return;
     }
@@ -315,8 +279,7 @@ typedef struct
     [self animateToState:toState completion:completion];
 }
 
-- (void)enterPresentationModeAnimated:(BOOL)animated
-                           completion:(PKDefaultCompletionHandler)completion
+- (void)enterPresentationModeAnimated:(BOOL)animated completion:(PKDefaultCompletionHandler)completion
 {
     NSAssert([self hasLeftViewController] || [self hasRightViewController], @"%@ ERROR - %s : Cannot enter presentation mode without either left or right view controller.", [self class], __PRETTY_FUNCTION__);
     
@@ -324,20 +287,13 @@ typedef struct
     
     if ([self hasLeftViewController] && [self hasRightViewController])
     {
-        if (self.state == PKRevealControllerShowsLeftViewController)
-        {
+        if (self.state == PKRevealControllerShowsLeftViewController) {
             toState = PKRevealControllerShowsLeftViewControllerInPresentationMode;
-        }
-        else if (self.state == PKRevealControllerShowsRightViewController)
-        {
+        } else if (self.state == PKRevealControllerShowsRightViewController) {
             toState = PKRevealControllerShowsRightViewControllerInPresentationMode;
-        }
-        else
-        {
+        } else {
             PKLog(@"%@ ERROR - %s : Cannot implicitly determine which side to enter presentation mode for. Please use enterPresentationModeForController:animated:completion: method.", [self class], __PRETTY_FUNCTION__);
-            
-            [self pk_performBlock:^
-            {
+            [self pk_performBlock:^ {
                 if (completion)
                 {
                     completion(NO);
@@ -346,33 +302,24 @@ typedef struct
             
             return;
         }
-    }
-    else if ([self hasLeftViewController])
-    {
+    } else if ([self hasLeftViewController]) {
         toState = PKRevealControllerShowsLeftViewControllerInPresentationMode;
-    }
-    else if ([self hasRightViewController])
-    {
+    } else if ([self hasRightViewController]) {
         toState = PKRevealControllerShowsRightViewControllerInPresentationMode;
     }
     
     [self animateToState:toState completion:completion];
 }
 
-- (void)resignPresentationModeEntirely:(BOOL)entirely
-                              animated:(BOOL)animated
-                            completion:(PKDefaultCompletionHandler)completion
+- (void)resignPresentationModeEntirely:(BOOL)entirely animated:(BOOL)animated completion:(PKDefaultCompletionHandler)completion
 {
     PKRevealControllerState toState = PKRevealControllerShowsFrontViewController;
     
     if (!entirely)
     {
-        if (self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode)
-        {
+        if (self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode) {
             toState = PKRevealControllerShowsLeftViewController;
-        }
-        else if (self.state == PKRevealControllerShowsRightViewControllerInPresentationMode)
-        {
+        } else if (self.state == PKRevealControllerShowsRightViewControllerInPresentationMode) {
             toState = PKRevealControllerShowsRightViewController;
         }
     }
@@ -380,22 +327,13 @@ typedef struct
     [self animateToState:toState completion:completion];
 }
 
-- (void)setFrontViewController:(UIViewController *)frontViewController
-              focusAfterChange:(BOOL)focus
-                    completion:(PKDefaultCompletionHandler)completion
+- (void)setFrontViewController:(UIViewController *)frontViewController focusAfterChange:(BOOL)focus completion:(PKDefaultCompletionHandler)completion
 {
     [self setFrontViewController:frontViewController];
-    
-    if (focus)
-    {
-        [self showViewController:self.frontViewController
-                        animated:YES
-                      completion:completion];
-    }
-    else
-    {
-        [self pk_performBlock:^
-        {
+    if (focus) {
+        [self showViewController:self.frontViewController animated:YES completion:completion];
+    } else {
+        [self pk_performBlock:^ {
             if (completion)
             {
                 completion(NO);
@@ -458,23 +396,18 @@ typedef struct
     }
 }
 
-- (void)setMinimumWidth:(CGFloat)minWidth
-           maximumWidth:(CGFloat)maxWidth
-      forViewController:(UIViewController *)controller
+- (void)setMinimumWidth:(CGFloat)minWidth maximumWidth:(CGFloat)maxWidth forViewController:(UIViewController *)controller
 {
-    if ([controller isEqual:self.leftViewController])
-    {
-        self.leftViewWidthRange = NSMakeRange(minWidth, (maxWidth - minWidth));
-    }
-    else if ([controller isEqual:self.rightViewController])
-    {
-        self.rightViewWidthRange = NSMakeRange(minWidth, (maxWidth - minWidth));
+    if ([controller isEqual:self.leftViewController]) {
+        self.leftViewWidthRange = NSMakeRange((unsigned int)minWidth, (unsigned int)(maxWidth - minWidth));
+    } else if ([controller isEqual:self.rightViewController]) {
+        self.rightViewWidthRange = NSMakeRange((unsigned int)minWidth, (unsigned int)(maxWidth - minWidth));
     }
 }
 
 - (void)setOptions:(NSDictionary *)options
 {
-    if (options)
+    if (options.count)
     {
         [self setValuesForKeysWithDictionary:options];
     }
@@ -498,7 +431,7 @@ typedef struct
 
 - (UIViewController *)focusedController
 {
-    UIViewController *controller = nil;
+    __weak UIViewController *controller = nil;
     
     switch (self.state)
     {
@@ -525,8 +458,7 @@ typedef struct
 
 - (BOOL)isPresentationModeActive
 {
-    return (self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode ||
-            self.state == PKRevealControllerShowsRightViewControllerInPresentationMode);
+    return (self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode || self.state == PKRevealControllerShowsRightViewControllerInPresentationMode);
 }
 
 - (BOOL)hasRightViewController
@@ -554,18 +486,47 @@ typedef struct
     _recognizesResetTapOnFrontViewInPresentationMode = DEFAULT_RECOGNIZES_RESET_TAP_ON_FRONT_VIEW_IN_PRESENTATION_MODE_VALUE;
 }
 
+- (CGRect)viewFrame:(ZNLPKRevealControllerViewType)type
+{
+    float width,xLocation = 0.0f;
+    float offset = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? 2.0f : 0.0f;
+
+    switch (type)
+    {
+        case kZNLPKRevealControllerViewTypeLeft :
+            width = self.leftViewMaxWidth - offset;
+            break;
+
+        case kZNLPKRevealControllerViewTypeRight :
+            width = self.rightViewMinWidth;
+            xLocation = (self.view.frame.size.width - self.rightViewMinWidth) + offset;
+            break;
+
+        default :
+            width = self.view.frame.size.width;
+            break;
+
+    }
+
+    CGRect frame = self.view.frame;
+    frame.size = CGSizeMake( width , self.view.frame.size.height );
+    frame.origin.x = xLocation;
+    return frame;
+
+}
+
 - (void)setupContainerViews
 {
-    self.rightView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
-    self.leftView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
-    self.frontView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
+    self.rightView = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeRight]];
+    self.leftView  = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeLeft]];
+    self.frontView = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeCentre]];
     
     self.rightView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-    self.leftView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+    self.leftView.autoresizingMask  = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
     self.frontView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
     
     self.rightView.viewController = self.rightViewController;
-    self.leftView.viewController = self.leftViewController;
+    self.leftView.viewController  = self.leftViewController;
     self.frontView.viewController = self.frontViewController;
     
     self.frontView.shadow = YES;
@@ -578,20 +539,16 @@ typedef struct
     [self.view addSubview:self.frontView];
     
     [self addViewController:self.frontViewController container:self.frontView];
+
 }
 
 - (void)setupGestureRecognizers
 {
-    self.revealPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self
-                                                                              action:@selector(didRecognizePanGesture:)];
-    
+    self.revealPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(didRecognizePanGesture:)];
     self.revealPanGestureRecognizer.maximumNumberOfTouches = 1;
-    
-    self.revealResetTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                   action:@selector(didRecognizeTapGesture:)];
-    
+    self.revealResetTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didRecognizeTapGesture:)];
     [self updatePanGestureRecognizerPresence];
-    [self updateTapGestureRecognizerPrecence];
+    [self updateTapGestureRecognizerPresence];
 }
 
 - (void)setRecognizesResetTapOnFrontView:(BOOL)recognizesResetTapOnFrontView
@@ -599,7 +556,7 @@ typedef struct
     if (_recognizesPanningOnFrontView != recognizesResetTapOnFrontView)
     {
         _recognizesPanningOnFrontView = recognizesResetTapOnFrontView;
-        [self updateTapGestureRecognizerPrecence];
+        [self updateTapGestureRecognizerPresence];
     }
 }
 
@@ -667,12 +624,7 @@ typedef struct
 
 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
 {
-    if ([key isEqualToString:@"state"])
-    {
-        return NO;
-    }
-    
-    return YES;
+    return ![key isEqualToString:@"state"];
 }
 
 #pragma mark - Gesture Recognition
@@ -734,35 +686,24 @@ typedef struct
     _frontViewInteraction.recognizerFlags.currentTouchPoint = [recognizer translationInView:self.frontView];
     CGFloat newX = _frontViewInteraction.initialFrontViewPosition.x + (_frontViewInteraction.recognizerFlags.initialTouchPoint.x + _frontViewInteraction.recognizerFlags.currentTouchPoint.x);
     
-    if (![self hasLeftViewController] && newX >= [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
-    {
+    if (![self hasLeftViewController] && newX >= [self centerPointForState:PKRevealControllerShowsFrontViewController].x) {
         newX = [self centerPointForState:PKRevealControllerShowsFrontViewController].x;
-    }
-    else if (![self hasRightViewController] && newX <= [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
-    {
+    } else if (![self hasRightViewController] && newX <= [self centerPointForState:PKRevealControllerShowsFrontViewController].x) {
         newX = [self centerPointForState:PKRevealControllerShowsFrontViewController].x;
-    }
-    else
-    {
+    } else {
+
         CGFloat dampenedLeft = [self dampenedValueForRealValue:(newX - CGRectGetMidX(self.frontView.bounds)) inRange:self.leftViewWidthRange] + CGRectGetMidX(self.frontView.bounds);
         CGFloat dampenedRight = [self dampenedValueForRealValue:(newX - CGRectGetMidX(self.frontView.bounds)) inRange:self.rightViewWidthRange] + CGRectGetMidX(self.frontView.bounds);
         
         if (newX >= [self centerPointForState:PKRevealControllerShowsLeftViewControllerInPresentationMode].x &&
-            !([self centerPointForState:PKRevealControllerShowsLeftViewControllerInPresentationMode].x >= dampenedLeft))
-        {
+            !([self centerPointForState:PKRevealControllerShowsLeftViewControllerInPresentationMode].x >= dampenedLeft)) {
             newX = self.frontView.layer.position.x;
-        }
-        else if (newX <= [self centerPointForState:PKRevealControllerShowsRightViewControllerInPresentationMode].x &&
-                 !([self centerPointForState:PKRevealControllerShowsRightViewControllerInPresentationMode].x <= dampenedRight))
-        {
+        } else if (newX <= [self centerPointForState:PKRevealControllerShowsRightViewControllerInPresentationMode].x &&
+                 !([self centerPointForState:PKRevealControllerShowsRightViewControllerInPresentationMode].x <= dampenedRight)) {
             newX = self.frontView.layer.position.x;
-        }
-        else if (newX >= [self centerPointForState:PKRevealControllerShowsLeftViewController].x)
-        {
+        } else if (newX >= [self centerPointForState:PKRevealControllerShowsLeftViewController].x) {
             newX = dampenedLeft;
-        }
-        else if (newX <= [self centerPointForState:PKRevealControllerShowsRightViewController].x)
-        {
+        } else if (newX <= [self centerPointForState:PKRevealControllerShowsRightViewController].x) {
             newX = dampenedRight;
         }
     }
@@ -781,40 +722,26 @@ typedef struct
     _frontViewInteraction.initialFrontViewPosition = CGPointZero;
     _frontViewInteraction.isInteracting = NO;
     
-    if ([self shouldMoveFrontViewLeftwardsForVelocity:[recognizer velocityInView:self.view].x])
-    {
+    if ([self shouldMoveFrontViewLeftwardsForVelocity:[recognizer velocityInView:self.view].x]) {
+
         PKRevealControllerState toState = PKRevealControllerShowsFrontViewController;
-        
-        if (self.state == PKRevealControllerShowsRightViewController ||
-            self.state == PKRevealControllerShowsRightViewControllerInPresentationMode)
-        {
+        if (self.state == PKRevealControllerShowsRightViewController || self.state == PKRevealControllerShowsRightViewControllerInPresentationMode) {
             toState = self.state;
-        }
-        else if (self.state == PKRevealControllerShowsFrontViewController && [self hasRightViewController])
-        {
+        } else if (self.state == PKRevealControllerShowsFrontViewController && [self hasRightViewController]) {
             toState = PKRevealControllerShowsRightViewController;
         }
-        
         [self animateToState:toState completion:nil];
-    }
-    else if ([self shouldMoveFrontViewRightwardsForVelocity:[recognizer velocityInView:self.frontView].x])
-    {
+
+    } else if ([self shouldMoveFrontViewRightwardsForVelocity:[recognizer velocityInView:self.frontView].x]) {
+
         PKRevealControllerState toState = PKRevealControllerShowsFrontViewController;
-        
-        if (self.state == PKRevealControllerShowsFrontViewController && [self hasLeftViewController])
-        {
+        if (self.state == PKRevealControllerShowsFrontViewController && [self hasLeftViewController]) {
             toState = PKRevealControllerShowsLeftViewController;
-        }
-        else if (self.state == PKRevealControllerShowsLeftViewController ||
-                 self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode)
-        {
+        } else if (self.state == PKRevealControllerShowsLeftViewController || self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode) {
             toState = self.state;
         }
-        
         [self animateToState:toState completion:nil];
-    }
-    else
-    {
+    } else {
         [self snapFrontViewToAppropriateEdge];
     }
 }
@@ -875,9 +802,7 @@ typedef struct
     {
         [self willChangeValueForKey:@"state"];
         
-        if (self.delegate &&
-            [self.delegate conformsToProtocol:@protocol(PKRevealing)] &&
-            [self.delegate respondsToSelector:@selector(revealController:willChangeToState:)])
+        if (self.delegate && [self.delegate conformsToProtocol:@protocol(PKRevealing)] && [self.delegate respondsToSelector:@selector(revealController:willChangeToState:)])
         {
             [self.delegate revealController:self willChangeToState:state];
         }
@@ -886,9 +811,7 @@ typedef struct
         
         [self didChangeValueForKey:@"state"];
         
-        if (self.delegate &&
-            [self.delegate conformsToProtocol:@protocol(PKRevealing)] &&
-            [self.delegate respondsToSelector:@selector(revealController:didChangeToState:)])
+        if (self.delegate && [self.delegate conformsToProtocol:@protocol(PKRevealing)] && [self.delegate respondsToSelector:@selector(revealController:didChangeToState:)])
         {
             [self.delegate revealController:self didChangeToState:state];
         }
@@ -897,69 +820,43 @@ typedef struct
 
 - (void)updateRearViewVisibilityForFrontViewPosition:(CGPoint)position
 {
-    if (position.x > [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
-    {
+    if (position.x > [self centerPointForState:PKRevealControllerShowsFrontViewController].x){
         [self showLeftView];
-    }
-    else if (position.x < [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
-    {
+    }else if (position.x < [self centerPointForState:PKRevealControllerShowsFrontViewController].x){
         [self showRightView];
-    }
-    else
-    {
+    }else{
         [self hideRearViews];
     }
 }
 
 - (void)updateRearViewVisibility
 {
-    if ([self isLeftViewVisible])
-    {
-        if (self.leftView.hidden)
-        {
-            [self showLeftView];
-        }
-    }
-    else if ([self isRightViewVisible])
-    {
-        if (self.rightView.hidden)
-        {
-            [self showRightView];
-        }
-    }
-    else
-    {
+    if (self.isLeftViewVisible) {
+        if(self.leftView.hidden)[self showLeftView];
+    } else if (self.isRightViewVisible) {
+        if(self.rightView.hidden)[self showRightView];
+    } else {
         if (!self.leftView.hidden || !self.rightView.hidden)
         {
             [self hideRearViews];
         }
     }
-    
     self.state = [self stateForCurrentFrontViewPosition];
 }
 
-- (void)updateTapGestureRecognizerPrecence
+- (void)updateTapGestureRecognizerPresence
 {
-    if ((self.state == PKRevealControllerShowsRightViewControllerInPresentationMode ||
-        self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode) &&
-        self.recognizesResetTapOnFrontViewInPresentationMode)
-    {
+    if ((self.state == PKRevealControllerShowsRightViewControllerInPresentationMode || self.state == PKRevealControllerShowsLeftViewControllerInPresentationMode) && self.recognizesResetTapOnFrontViewInPresentationMode) {
         if(![self.frontView.gestureRecognizers containsObject:self.revealResetTapGestureRecognizer])
         {
             [self.frontView addGestureRecognizer:self.revealResetTapGestureRecognizer];
         }
-    }
-    else if ((self.state == PKRevealControllerShowsLeftViewController ||
-              self.state == PKRevealControllerShowsRightViewController) &&
-             self.recognizesResetTapOnFrontView)
-    {
+    } else if ((self.state == PKRevealControllerShowsLeftViewController || self.state == PKRevealControllerShowsRightViewController) && self.recognizesResetTapOnFrontView) {
         if(![self.frontView.gestureRecognizers containsObject:self.revealResetTapGestureRecognizer])
         {
             [self.frontView addGestureRecognizer:self.revealResetTapGestureRecognizer];
         }
-    }
-    else
-    {
+    } else {
         if ([self.frontView.gestureRecognizers containsObject:self.revealResetTapGestureRecognizer])
         {
             [self.frontView removeGestureRecognizer:self.revealResetTapGestureRecognizer];
@@ -969,15 +866,12 @@ typedef struct
 
 - (void)updatePanGestureRecognizerPresence
 {
-    if (self.recognizesPanningOnFrontView)
-    {
+    if (self.recognizesPanningOnFrontView) {
         if (![self.frontView.gestureRecognizers containsObject:self.revealPanGestureRecognizer])
         {
             [self.frontView addGestureRecognizer:self.revealPanGestureRecognizer];
         }
-    }
-    else
-    {
+    } else {
         if ([self.frontView.gestureRecognizers containsObject:self.revealPanGestureRecognizer])
         {
             [self.frontView removeGestureRecognizer:self.revealPanGestureRecognizer];
@@ -987,11 +881,27 @@ typedef struct
 
 - (void)hideRearViews
 {
-    self.rightView.hidden = YES;
-    self.leftView.hidden = YES;
-    [self removeViewController:self.leftViewController];
-    [self removeViewController:self.rightViewController];
-    [self.frontView setUserInteractionForContainedViewEnabled:YES];
+    CALayer *layer = (CALayer *)[self.frontView.layer presentationLayer];
+    if (layer.position.x == CGRectGetMidX(self.view.bounds))
+    {
+        self.rightView.hidden = YES;
+        self.leftView.hidden = YES;
+        [self removeViewController:self.leftViewController];
+        [self removeViewController:self.rightViewController];
+        [self.frontView setUserInteractionForContainedViewEnabled:YES];
+    }
+}
+
+- (BOOL)isLeftViewVisible
+{
+    CALayer *layer = self.frontView.layer;
+    return (layer.position.x > CGRectGetMidX(self.view.bounds));
+}
+
+- (BOOL)isRightViewVisible
+{
+    CALayer *layer = self.frontView.layer;
+    return (layer.position.x < CGRectGetMidX(self.view.bounds));
 }
 
 - (void)showRightView
@@ -1012,37 +922,19 @@ typedef struct
     [self.frontView setUserInteractionForContainedViewEnabled:NO];
 }
 
-- (BOOL)isLeftViewVisible
-{
-    CALayer *layer = (CALayer *)[self.frontView.layer presentationLayer];
-    return (layer.position.x > CGRectGetMidX(self.view.bounds));
-}
-
-- (BOOL)isRightViewVisible
-{
-    CALayer *layer = (CALayer *)[self.frontView.layer presentationLayer];
-    return (layer.position.x < CGRectGetMidX(self.view.bounds));
-}
-
 - (void)snapFrontViewToAppropriateEdge
 {
-    CGFloat visibleWidth = 0.0;
-    
+    CGFloat visibleWidth;
     PKRevealControllerState toState = PKRevealControllerShowsFrontViewController;
     
-    if ([self isLeftViewVisible])
-    {
+    if ([self isLeftViewVisible]) {
         visibleWidth = self.frontView.layer.position.x - self.leftView.layer.position.x;
-        
         if (visibleWidth > ([self leftViewMinWidth] / 2.0))
         {
             toState = PKRevealControllerShowsLeftViewController;
         }
-    }
-    else if ([self isRightViewVisible])
-    {
+    } else if ([self isRightViewVisible]) {
         visibleWidth = self.rightView.layer.position.x - self.frontView.layer.position.x;
-        
         if (visibleWidth > ([self rightViewMinWidth] / 2.0))
         {
             toState = PKRevealControllerShowsRightViewController;
@@ -1066,8 +958,7 @@ typedef struct
 
 - (void)addViewController:(UIViewController *)childController container:(UIView *)container
 {
-    if (childController &&
-        ![self.childViewControllers containsObject:childController])
+    if (childController && ![self.childViewControllers containsObject:childController])
     {
         [self addChildViewController:childController];
         childController.view.frame = container.bounds;
@@ -1089,41 +980,54 @@ typedef struct
     }
 }
 
+- (void)updateViewsForState:(PKRevealControllerState)state
+{
+    switch (state)
+    {
+        case PKRevealControllerShowsLeftViewController:
+        case PKRevealControllerShowsLeftViewControllerInPresentationMode:
+            [self showLeftView];
+            break;
+        case PKRevealControllerShowsRightViewController:
+        case PKRevealControllerShowsRightViewControllerInPresentationMode:
+            [self showRightView];
+            break;
+        default:
+            [self hideRearViews];
+
+    }
+}
+
 #pragma mark - Animations
 
 - (void)animateToState:(PKRevealControllerState)toState completion:(PKDefaultCompletionHandler)completion
 {
-    [self updateRearViewVisibility];
+    [self updateViewsForState:toState];
     [self.animator stopAnimationForKey:kPKRevealControllerFrontViewTranslationAnimationKey];
-    
-    PKSequentialAnimation *animation = [PKSequentialAnimation animationForKeyPath:@"position"
-                                                                           values:[self keyPositionsToState:toState]
-                                                                         duration:self.animationDuration];
-    
-    animation.progressHandler = ^(NSValue *fromValue, NSValue *toValue, NSUInteger index)
-    {
-        if ([fromValue CGPointValue].x == [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
-        {
-            [self updateRearViewVisibilityForFrontViewPosition:[toValue CGPointValue]];
-        }
-        else
-        {
-            [self updateRearViewVisibility];
+
+    PKSequentialAnimation *animation = [PKSequentialAnimation animationForKeyPath:@"position" values:[self keyPositionsToState:toState] duration:self.animationDuration];
+
+    __weak typeof(self) weakSelf = self;
+    animation.progressHandler = ^(NSValue *fromValue, NSValue *toValue, NSUInteger index){
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ([fromValue CGPointValue].x == [strongSelf centerPointForState:PKRevealControllerShowsFrontViewController].x) {
+            [strongSelf updateRearViewVisibilityForFrontViewPosition:[toValue CGPointValue]];
+        } else {
+            [strongSelf updateRearViewVisibility];
         }
     };
-    
-    animation.completionHandler = ^(BOOL finished)
-    {
-        if (finished)
+
+    animation.completionHandler = ^(BOOL finished){
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if(finished)
         {
-            [self updateRearViewVisibility];
+            [strongSelf updateRearViewVisibility];
         }
+
+        [strongSelf updateTapGestureRecognizerPresence];
+        [strongSelf updatePanGestureRecognizerPresence];
         
-        [self updateTapGestureRecognizerPrecence];
-        [self updatePanGestureRecognizerPresence];
-        
-        [self pk_performBlock:^
-        {
+        [strongSelf pk_performBlock:^ {
             if (completion)
             {
                 completion(finished);
@@ -1142,79 +1046,31 @@ typedef struct
     NSArray *keyPositions = nil;
     PKRevealControllerState fromState = self.state;
     
-    if (fromState == toState)
-    {
+    if (fromState == toState) {
         keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-    }
-    else
-    {
-        if (fromState == PKRevealControllerShowsLeftViewControllerInPresentationMode)
-        {
-            if (toState == PKRevealControllerShowsLeftViewController ||
-                toState == PKRevealControllerShowsFrontViewController)
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-            }
-            else
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:YES];
-            }
-        }
-        else if (fromState == PKRevealControllerShowsLeftViewController)
-        {
-            if (toState == PKRevealControllerShowsLeftViewControllerInPresentationMode ||
-                toState == PKRevealControllerShowsFrontViewController)
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-            }
-            else
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:YES];
-            }
-        }
-        else if (fromState == PKRevealControllerShowsFrontViewController)
-        {
+    } else {
+        if (fromState == PKRevealControllerShowsLeftViewControllerInPresentationMode) {
+            keyPositions = [self keyPositionsToState:toState viaFrontView:!(toState == PKRevealControllerShowsLeftViewController || toState == PKRevealControllerShowsFrontViewController)];
+        } else if (fromState == PKRevealControllerShowsLeftViewController) {
+            keyPositions = [self keyPositionsToState:toState viaFrontView:!(toState == PKRevealControllerShowsLeftViewControllerInPresentationMode || toState == PKRevealControllerShowsFrontViewController)];
+        } else if (fromState == PKRevealControllerShowsFrontViewController) {
             keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-        }
-        else if (fromState == PKRevealControllerShowsRightViewController)
-        {
-            if (toState == PKRevealControllerShowsFrontViewController ||
-                toState == PKRevealControllerShowsRightViewControllerInPresentationMode)
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-            }
-            else
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:YES];
-            }
-        }
-        else if (fromState == PKRevealControllerShowsRightViewControllerInPresentationMode)
-        {
-            if (toState == PKRevealControllerShowsRightViewController ||
-                toState == PKRevealControllerShowsFrontViewController)
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:NO];
-            }
-            else
-            {
-                keyPositions = [self keyPositionsToState:toState viaFrontView:YES];
-            }
+        } else if (fromState == PKRevealControllerShowsRightViewController) {
+            keyPositions = [self keyPositionsToState:toState viaFrontView:!(toState == PKRevealControllerShowsFrontViewController || toState == PKRevealControllerShowsRightViewControllerInPresentationMode)];
+        } else if (fromState == PKRevealControllerShowsRightViewControllerInPresentationMode) {
+            keyPositions = [self keyPositionsToState:toState viaFrontView:!(toState == PKRevealControllerShowsRightViewController || toState == PKRevealControllerShowsFrontViewController)];
         }
     }
-    
+
     return keyPositions;
 }
 
-- (NSArray *)keyPositionsToState:(PKRevealControllerState)toState
-                    viaFrontView:(BOOL)viaFrontView
+- (NSArray *)keyPositionsToState:(PKRevealControllerState)toState viaFrontView:(BOOL)viaFrontView
 {
-    if (viaFrontView)
-    {
+    if (viaFrontView) {
         return @[[NSValue valueWithCGPoint:[self centerPointForState:PKRevealControllerShowsFrontViewController]],
                  [NSValue valueWithCGPoint:[self centerPointForState:toState]]];
-    }
-    else
-    {
+    } else {
         return @[[NSValue valueWithCGPoint:[self centerPointForState:toState]]];
     }
 }
@@ -1326,7 +1182,7 @@ typedef struct
     return self.rightViewWidthRange.location + self.rightViewWidthRange.length;
 }
 
-#pragma mark - Autorotation
+#pragma mark - AutoRotation
 
 /*
  * Please Note:
@@ -1334,28 +1190,15 @@ typedef struct
  */
 - (BOOL)shouldAutorotate
 {
-    if (_frontViewInteraction.isInteracting)
-    {
+    if (_frontViewInteraction.isInteracting) {
         return NO;
-    }
-    else if ([self hasLeftViewController] && [self hasRightViewController])
-    {
-        return [self.frontViewController shouldAutorotate] &&
-               [self.leftViewController shouldAutorotate] &&
-               [self.rightViewController shouldAutorotate];
-    }
-    else if ([self hasLeftViewController])
-    {
-        return [self.frontViewController shouldAutorotate] &&
-               [self.leftViewController shouldAutorotate];
-    }
-    else if ([self hasRightViewController])
-    {
-        return [self.frontViewController shouldAutorotate] &&
-               [self.rightViewController shouldAutorotate];
-    }
-    else
-    {
+    } else if ([self hasLeftViewController] && [self hasRightViewController]) {
+        return [self.frontViewController shouldAutorotate] && [self.leftViewController shouldAutorotate] && [self.rightViewController shouldAutorotate];
+    } else if ([self hasLeftViewController]) {
+        return [self.frontViewController shouldAutorotate] && [self.leftViewController shouldAutorotate];
+    } else if ([self hasRightViewController]) {
+        return [self.frontViewController shouldAutorotate] && [self.rightViewController shouldAutorotate];
+    } else {
         return [self.frontViewController shouldAutorotate];
     }
 }
@@ -1386,34 +1229,20 @@ typedef struct
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    if (_frontViewInteraction.isInteracting)
-    {
+    if (_frontViewInteraction.isInteracting) {
         return NO;
-    }
-    else if ([self hasLeftViewController] && [self hasRightViewController])
-    {
-        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] &&
-               [self.leftViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] &&
-               [self.rightViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
-    }
-    else if ([self hasLeftViewController])
-    {
-        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] &&
-               [self.leftViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
-    }
-    else if ([self hasRightViewController])
-    {
-        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] &&
-               [self.rightViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
-    }
-    else
-    {
+    } else if ([self hasLeftViewController] && [self hasRightViewController]) {
+        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] && [self.leftViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] && [self.rightViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
+    } else if ([self hasLeftViewController]) {
+        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] && [self.leftViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
+    } else if ([self hasRightViewController]) {
+        return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation] && [self.rightViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
+    } else {
         return [self.frontViewController shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
     }
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-                                         duration:(NSTimeInterval)duration
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     [self.frontView updateShadowWithAnimationDuration:duration];
 }

@@ -280,34 +280,3 @@ FOUNDATION_EXTERN NSString * const PKRevealControllerRecognizesResetTapOnFrontVi
 
 @end
 
-#pragma mark - Deprecated as of 2.0.1
-
-@interface PKRevealController (Deprecated)
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                     leftViewController:(UIViewController *)leftViewController
-                                    rightViewController:(UIViewController *)rightViewController
-                                                options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:leftViewController:rightViewController: instead. Set options using the options property.")));
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                     leftViewController:(UIViewController *)leftViewController
-                                                options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:leftViewController: instead. Set options using the options property.")));
-
-+ (instancetype)revealControllerWithFrontViewController:(UIViewController *)frontViewController
-                                    rightViewController:(UIViewController *)rightViewController
-                                                options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:rightViewController: instead. Set options using the options property.")));
-
-- (instancetype)initWithFrontViewController:(UIViewController *)frontViewController
-                         leftViewController:(UIViewController *)leftViewController
-                        rightViewController:(UIViewController *)rightViewController
-                                    options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:leftViewController:rightViewController: instead. Set options using the options property.")));
-
-- (instancetype)initWithFrontViewController:(UIViewController *)frontViewController
-                         leftViewController:(UIViewController *)leftViewController
-                                    options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:leftViewController: instead. Set options using the options property.")));
-
-- (instancetype)initWithFrontViewController:(UIViewController *)frontViewController
-                        rightViewController:(UIViewController *)rightViewController
-                                    options:(NSDictionary *)options __attribute__((deprecated("Use +revealControllerWithFrontViewController:rightViewController: instead. Set options using the options property.")));
-
-@end

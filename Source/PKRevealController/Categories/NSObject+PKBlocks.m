@@ -32,26 +32,14 @@
 {
     if (!block) return;
     
-    if (mainThread)
-    {
-        if ([NSThread isMainThread])
-        {
+    if (mainThread) {
+        if ([NSThread isMainThread]) {
             block();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^ { block(); });
         }
-        else
-        {
-            dispatch_async(dispatch_get_main_queue(), ^
-            {
-                block();
-            });
-        }
-    }
-    else
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^
-        {
-            block();
-        });
+    } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^ { block(); });
     }
 }
 

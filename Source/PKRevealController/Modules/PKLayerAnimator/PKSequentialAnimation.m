@@ -64,7 +64,6 @@
     animation.animations = [animation animationsForKeyPath:keyPath withValues:values duration:duration];
     animation.completionHandler = completion;
     animation.progressHandler = progress;
-    
     return animation;
 }
 
@@ -83,7 +82,6 @@
          animation.timingFunction = [self timingFunctionForAnimationAtIndex:index totalNumberOfAnimations:[values count]];
          animation.identifier = index;
          animation.delegate = self;
-         
          [animations addObject:animation];
      }];
     
@@ -123,11 +121,10 @@
      {
          CAAnimation *animation = [self.layer animationForKey:key];
          
-         if ([animation isMemberOfClass:[PKAnimation class]] &&
-             [key hasPrefix:self.key])
+         if ([animation isMemberOfClass:[PKAnimation class]] && [key hasPrefix:self.key])
          {
-             PKAnimation *animation = (PKAnimation *)[self.layer animationForKey:key];
-             [self.layer setValue:[presentationLayer valueForKeyPath:animation.keyPath] forKeyPath:animation.keyPath];
+             PKAnimation *animation2 = (PKAnimation *)[self.layer animationForKey:key];
+             [self.layer setValue:[presentationLayer valueForKeyPath:animation2.keyPath] forKeyPath:animation2.keyPath];
              [self.layer removeAnimationForKey:key];
          }
      }];
@@ -137,96 +134,71 @@
 {
     CAMediaTimingFunction *function = nil;
     
-    if (total == 1)
-    {
+    if (total == 1) {
         function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    }
-    else if (total == 2)
-    {
-        if (index == 0)
-        {
+    } else if (total == 2) {
+        if (index == 0) {
             function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-        }
-        else
-        {
+        } else {
             function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         }
-    }
-    else
-    {
-        if (index == 0)
-        {
+    } else {
+        if (index == 0) {
             function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-        }
-        else if ((index + 1) == total)
-        {
+        } else if ((index + 1) == total) {
             function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-        }
-        else
-        {
+        } else {
             function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         }
     }
-    
     return function;
 }
 
-- (void)animationDidStart:(CAAnimation *)anim
+- (void)animationDidStart:(CAAnimation *)animation
 {
     self.animating = YES;
+    PKAnimation *animation2 = self.animations[(unsigned int)animation.pk_identifier];
     
-    PKAnimation *animation = self.animations[anim.pk_identifier];
-    
-    [self pk_performBlock:^
-    {
+    [self pk_performBlock:^ {
         if (self.progressHandler)
         {
-            self.progressHandler(animation.fromValue, animation.toValue, animation.identifier);
+            self.progressHandler(animation2.fromValue, animation2.toValue, (unsigned int)animation2.identifier);
         }
-    }
-    onMainThread:YES];
+    } onMainThread:YES];
 }
 
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag
 {
-    NSInteger currentIndex = anim.pk_identifier;
+    NSInteger currentIndex = animation.pk_identifier;
     NSInteger lastAnimationIndex = [self.animations count] - 1;
     
-    if (flag && currentIndex < lastAnimationIndex)
-    {
-        NSUInteger nextAnimationIndex = currentIndex + 1;
+    if (flag && currentIndex < lastAnimationIndex) {
+        NSUInteger nextAnimationIndex = ((unsigned int)currentIndex) + 1;
         
         NSString *nextAnimationIndexString = [NSString stringWithFormat:@"%lu", (unsigned long)nextAnimationIndex];
         PKAnimation *nextAnimation = self.animations[nextAnimationIndex];
         nextAnimation.fromValue = [((CALayer *)self.layer.presentationLayer) valueForKeyPath:nextAnimation.keyPath];
         
-        [self pk_performBlock:^
-        {
+        [self pk_performBlock:^ {
             if (self.progressHandler)
             {
-                self.progressHandler(nextAnimation.fromValue,
-                                     nextAnimation.toValue,
-                                     nextAnimationIndex);
+                self.progressHandler(nextAnimation.fromValue, nextAnimation.toValue, nextAnimationIndex);
             }
-        }
-        onMainThread:YES];
+        } onMainThread:YES];
         
         [self.layer setValue:nextAnimation.toValue forKeyPath:nextAnimation.keyPath];
         [self.layer addAnimation:nextAnimation forKey:nextAnimationIndexString];
-    }
-    else
-    {
+
+    } else {
         self.animating = NO;
         [self stopAnimation];
         
-        [self pk_performBlock:^
-        {
+        [self pk_performBlock:^ {
             if (self.completionHandler)
             {
                 self.completionHandler(flag);
             }
-        }
-        onMainThread:YES];
+        } onMainThread:YES];
     }
 }
 
