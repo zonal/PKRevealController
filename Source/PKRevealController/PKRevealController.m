@@ -486,40 +486,11 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
     _recognizesResetTapOnFrontViewInPresentationMode = DEFAULT_RECOGNIZES_RESET_TAP_ON_FRONT_VIEW_IN_PRESENTATION_MODE_VALUE;
 }
 
-- (CGRect)viewFrame:(ZNLPKRevealControllerViewType)type
-{
-    float width,xLocation = 0.0f;
-    float offset = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? 2.0f : 0.0f;
-
-    switch (type)
-    {
-        case kZNLPKRevealControllerViewTypeLeft :
-            width = self.leftViewMaxWidth - offset;
-            break;
-
-        case kZNLPKRevealControllerViewTypeRight :
-            width = self.rightViewMinWidth;
-            xLocation = (self.view.frame.size.width - self.rightViewMinWidth) + offset;
-            break;
-
-        default :
-            width = self.view.frame.size.width;
-            break;
-
-    }
-
-    CGRect frame = self.view.frame;
-    frame.size = CGSizeMake( width , self.view.frame.size.height );
-    frame.origin.x = xLocation;
-    return frame;
-
-}
-
 - (void)setupContainerViews
 {
-    self.rightView = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeRight]];
-    self.leftView  = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeLeft]];
-    self.frontView = [[PKRevealControllerView alloc] initWithFrame:[self viewFrame:kZNLPKRevealControllerViewTypeCentre]];
+    self.rightView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
+    self.leftView  = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
+    self.frontView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
     
     self.rightView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
     self.leftView.autoresizingMask  = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
