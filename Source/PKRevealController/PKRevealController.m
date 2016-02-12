@@ -75,9 +75,9 @@ typedef struct
 
 typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 {
-    kZNLPKRevealControllerViewTypeLeft,
-    kZNLPKRevealControllerViewTypeRight,
-    kZNLPKRevealControllerViewTypeCentre
+    ZNLPKRevealControllerViewTypeLeft,
+    ZNLPKRevealControllerViewTypeRight,
+    ZNLPKRevealControllerViewTypeCentre
 };
 
 #pragma mark - Properties
@@ -400,8 +400,10 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 {
     if ([controller isEqual:self.leftViewController]) {
         self.leftViewWidthRange = NSMakeRange((unsigned int)minWidth, (unsigned int)(maxWidth - minWidth));
+        self.leftView.frame = [self frameForViewOfType:ZNLPKRevealControllerViewTypeLeft];
     } else if ([controller isEqual:self.rightViewController]) {
         self.rightViewWidthRange = NSMakeRange((unsigned int)minWidth, (unsigned int)(maxWidth - minWidth));
+        self.rightView.frame = [self frameForViewOfType:ZNLPKRevealControllerViewTypeRight];
     }
 }
 
@@ -486,11 +488,47 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
     _recognizesResetTapOnFrontViewInPresentationMode = DEFAULT_RECOGNIZES_RESET_TAP_ON_FRONT_VIEW_IN_PRESENTATION_MODE_VALUE;
 }
 
+- (CGRect)frameForViewOfType:(ZNLPKRevealControllerViewType)type
+{
+    float width,xLocation = 0.0f;
+    float offset = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? 2.0f : 0.0f;
+    
+    switch (type)
+    {
+        case ZNLPKRevealControllerViewTypeLeft :
+            if (self.leftViewWidthRange.length)
+            {
+                return self.view.bounds;
+            }
+            width = self.leftViewMaxWidth - offset;
+            break;
+            
+        case ZNLPKRevealControllerViewTypeRight :
+            if (self.rightViewWidthRange.length)
+            {
+                return self.view.bounds;
+            }
+            width = self.rightViewMinWidth;
+            xLocation = (self.view.bounds.size.width - self.rightViewMinWidth) + offset;
+            break;
+            
+        default :
+            return self.view.bounds;
+            break;
+            
+    }
+    
+    CGRect frame = self.view.bounds;
+    frame.size = CGSizeMake( width , self.view.bounds.size.height );
+    frame.origin.x = xLocation;
+    return frame;
+}
+
 - (void)setupContainerViews
 {
-    self.rightView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
-    self.leftView  = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
-    self.frontView = [[PKRevealControllerView alloc] initWithFrame:self.view.bounds];
+    self.rightView = [[PKRevealControllerView alloc] initWithFrame:[self frameForViewOfType:ZNLPKRevealControllerViewTypeRight]];
+    self.leftView  = [[PKRevealControllerView alloc] initWithFrame:[self frameForViewOfType:ZNLPKRevealControllerViewTypeLeft]];
+    self.frontView = [[PKRevealControllerView alloc] initWithFrame:[self frameForViewOfType:ZNLPKRevealControllerViewTypeCentre]];
     
     self.rightView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
     self.leftView.autoresizingMask  = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -510,7 +548,6 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
     [self.view addSubview:self.frontView];
     
     [self addViewController:self.frontViewController container:self.frontView];
-
 }
 
 - (void)setupGestureRecognizers
