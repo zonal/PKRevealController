@@ -68,7 +68,7 @@ typedef struct
     BOOL isInteracting;
 } PKRevealControllerFrontViewInteractionFlags;
 
-@interface PKRevealController()
+@interface PKRevealController() <UIGestureRecognizerDelegate>
 {
     PKRevealControllerFrontViewInteractionFlags _frontViewInteraction;
 }
@@ -553,6 +553,7 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 - (void)setupGestureRecognizers
 {
     self.revealPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(didRecognizePanGesture:)];
+    self.revealPanGestureRecognizer.delegate = self;
     self.revealPanGestureRecognizer.maximumNumberOfTouches = 1;
     self.revealResetTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didRecognizeTapGesture:)];
     [self updatePanGestureRecognizerPresence];
@@ -1253,6 +1254,18 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     [self.frontView updateShadowWithAnimationDuration:duration];
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]
+        && [[[otherGestureRecognizer.view class] description] rangeOfString:@"UITableView"].length)
+    {
+        return YES;
+    }
+    return NO;
 }
 
 @end
