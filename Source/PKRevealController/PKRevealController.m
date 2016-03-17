@@ -1260,10 +1260,9 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
-    if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]
-        && [[[otherGestureRecognizer.view class] description] rangeOfString:@"UITableView"].length)
+    if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [[[otherGestureRecognizer.view class] description] rangeOfString:@"UITableView"].length)
     {
-        return YES;
+        return ((UITableView *)otherGestureRecognizer.view).isEditing;
     }
     return NO;
 }
