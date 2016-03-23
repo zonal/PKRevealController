@@ -1258,7 +1258,7 @@ typedef NS_ENUM(NSUInteger , ZNLPKRevealControllerViewType)
 
 #pragma mark - UIGestureRecognizerDelegate
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]
         && [[[otherGestureRecognizer.view class] description] rangeOfString:@"UITableView"].length)
